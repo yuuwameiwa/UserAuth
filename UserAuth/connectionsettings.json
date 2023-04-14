@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "SqlConnection": "Server=localhost;Database=UserMvc;Integrated Security=True;TrustServerCertificate=True",
+    "IDatabase": "localhost:6379"
+  }
+}
