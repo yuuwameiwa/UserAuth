@@ -7,7 +7,7 @@ namespace UserAuth.Services
     /// </summary>
     public abstract class BaseDatabaseService
     {
-        public DataContainer _dataContainer { get; private set; }
+        protected DataContainer _dataContainer { get; set; }
 
         public BaseDatabaseService(DataContainer dataContainer)
         {

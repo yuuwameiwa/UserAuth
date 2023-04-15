@@ -1,8 +1,5 @@
-﻿using DataHelper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-
-using StackExchange.Redis;
+﻿using Microsoft.AspNetCore.Mvc;
+using DataHelper;
 
 using UserAuth.Models;
 using UserAuth.Services;
@@ -11,12 +8,15 @@ namespace UserAuth.Controllers
 {
     public class SignupController : Controller
     {
-        private readonly DataContainer _dataContainer;
+        private DataContainer _dataContainer;
 
         public SignupController()
         {
-            _dataContainer.SqlConn = DatabaseConnectorService.TryConnectToSql();
-            _dataContainer.Redis = DatabaseConnectorService.TryConnectToRedis();
+            DataContainer dataContainer = new DataContainer(
+                DatabaseConnectorService.TryConnectToSql(), 
+                DatabaseConnectorService.TryConnectToRedis());
+
+            _dataContainer = dataContainer;
         }
 
         public IActionResult Index()
@@ -30,9 +30,7 @@ namespace UserAuth.Controllers
             UserService userService = new UserService(_dataContainer);
             userService.RegisterUser(userModel);
 
-            //IDatabase redis = DatabaseService.TryConnectToRedis();
-
-            return RedirectToAction("Signin", "Signin");
+            return RedirectToAction("Index", "Signin");
         }
     }
 }

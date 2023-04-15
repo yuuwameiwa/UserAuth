@@ -1,6 +1,5 @@
 ﻿using DataHelper;
-using Microsoft.Data.SqlClient;
-using StackExchange.Redis;
+using System.Reflection;
 using UserAuth.Models;
 
 namespace UserAuth.Services
@@ -13,14 +12,34 @@ namespace UserAuth.Services
 
         public void RegisterUser(UserModel userModel)
         {
-            DataWriter dataWriter = new DataWriter(_dataContainer);
-            dataWriter.WriteToSql(userModel, out int? id);
+            if (_dataContainer.SqlConn != null && _dataContainer.Redis != null)
+            {
+                DataWriter dataWriter = new DataWriter(_dataContainer);
+                int id = dataWriter.WriteToSqlWithIdentity(userModel);
+                userModel.Id = id;
+                dataWriter.WriteToRedis(userModel);
+            }
+        }
 
-            if (id == null)
-                throw new ArgumentNullException($"У {nameof(userModel)} не может быть null значения Id");
+        public void FindUser(UserModel userModel)
+        {
+            if (_dataContainer.SqlConn != null && _dataContainer?.Redis != null)
+            {
+                DataFinder dataFinder = new DataFinder(_dataContainer);
 
-            userModel.Id = id;
-            dataWriter.WriteToRedis(userModel);
+                TableAttribute? tableAttr = userModel.GetType().GetCustomAttribute<TableAttribute>();
+                string tableName = tableAttr.TableName;
+
+                var findData = new
+                {
+                    TableName = tableName,
+                    Name = userModel.Name,
+                    Password = userModel.Password,
+                };
+
+                UserModel findedUser = dataFinder.FindInSql<UserModel>(findData);
+                Console.WriteLine('a');
+            }
         }
     }
 }
