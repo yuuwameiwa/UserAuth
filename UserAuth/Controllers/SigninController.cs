@@ -1,14 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+
 using DataHelper;
 
 using UserAuth.Models;
 using UserAuth.Services;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.WebSockets;
+using Microsoft.AspNetCore.Http;
 
 namespace UserAuth.Controllers
 {
     public class SigninController : Controller
     {
-        private DataContainer _dataContainer;
+        private readonly DataContainer _dataContainer;
 
         public SigninController()
         {
@@ -25,12 +30,23 @@ namespace UserAuth.Controllers
         }
 
         [HttpPost]
-        public IActionResult Signin(UserModel userModel)
+        public async Task<IActionResult> SigninAsync(UserModel userModel)
         {
             UserService userService = new UserService(_dataContainer);
-            userService.FindUser(userModel);
+            UserModel? findedUser =  userService.FindUser(userModel);
 
-            return null;
+            if (findedUser != null && findedUser.Id != null)
+            {
+                string token = userService.GetJwtFromApi((int)findedUser.Id).Result;
+
+                HttpContext.Response.Cookies.Append("jwt", token,
+                new CookieOptions
+                {
+                    MaxAge = TimeSpan.FromMinutes(60)
+                });
+            }
+
+            return RedirectToAction("Index", "TestJwt");
         }
     }
 }

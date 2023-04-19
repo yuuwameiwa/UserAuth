@@ -1,5 +1,12 @@
-﻿@{
+﻿@model UserAuth.Models.UserModel
+
+@{
     ViewData["Title"] = "Home Page";
+}
+
+@if (Model != null)
+{
+    <h1>Hello, @Model.Login!</h1>
 }
 
 <div class="text-center">
